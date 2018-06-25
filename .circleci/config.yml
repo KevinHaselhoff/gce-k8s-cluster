@@ -16,7 +16,7 @@ jobs:
              --cluster-version "1.10.4-gke.2" --machine-type "f1-micro" \
              --image-type "COS" --disk-type "pd-standard" --preemptible \
              --service-account "circleci@${GOOGLE_PROJECT_ID}.iam.gserviceaccount.com" \
-             --num-nodes "1" --enable-stackdriver-kubernetes --network "default" \
+             --num-nodes "3" --enable-stackdriver-kubernetes --network "default" \
              --subnetwork "default" --enable-autoupgrade --enable-autorepair \
              --addons HorizontalPodAutoscaling,HttpLoadBalancing,KubernetesDashboard
              gcloud --quiet container clusters get-credentials ${GOOGLE_CLUSTER_NAME}
