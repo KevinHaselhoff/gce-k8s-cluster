@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  build:
+  create-cluster:
     docker:
       - image: google/cloud-sdk:alpine
     steps:
@@ -20,3 +20,10 @@ jobs:
              --subnetwork "default" --enable-autoupgrade --enable-autorepair \
              --addons HorizontalPodAutoscaling,HttpLoadBalancing,KubernetesDashboard
              gcloud --quiet container clusters get-credentials ${GOOGLE_CLUSTER_NAME}
+
+workflows:
+  version: 2
+  create-cluster:
+    jobs:
+      - create-cluster:
+          context: GKE
