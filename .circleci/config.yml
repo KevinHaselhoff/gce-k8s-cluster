@@ -12,13 +12,24 @@ jobs:
              gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
              gcloud --quiet config set compute/zone ${GOOGLE_COMPUTE_ZONE}
              gcloud --quiet beta container clusters create ${GOOGLE_CLUSTER_NAME} \
-             --region ${GOOGLE_COMPUTE_ZONE} --username "kevin.haselhoff" --disk-size "10" \
-             --cluster-version "1.10.4-gke.2" --machine-type "f1-micro" \
-             --image-type "COS" --disk-type "pd-standard" --preemptible \
+             --region ${GOOGLE_COMPUTE_ZONE} \
+             --username "kevin.haselhoff" \
+             --disk-size "10" \
+             --cluster-version "1.10.5-gke.2" \
+             --machine-type "f1-micro" \
+             --image-type "COS" \
+             --disk-type "pd-standard" \
+             --preemptible \
              --service-account "circleci@${GOOGLE_PROJECT_ID}.iam.gserviceaccount.com" \
-             --num-nodes "3" --enable-stackdriver-kubernetes --network "default" \
-             --subnetwork "default" --enable-autoupgrade --enable-autorepair \
-             --addons HorizontalPodAutoscaling,HttpLoadBalancing,KubernetesDashboard
+             --num-nodes "3" \
+             --enable-stackdriver-kubernetes \
+             --network "default" \
+             --subnetwork "default" \
+             --enable-autoscaling \
+             --min-nodes "3" \
+             --max-nodes "5" \
+             --enable-autoupgrade --enable-autorepair \
+             --addons HorizontalPodAutoscaling,HttpLoadBalancing
              gcloud --quiet container clusters get-credentials ${GOOGLE_CLUSTER_NAME}
 
 workflows:
