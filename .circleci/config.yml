@@ -15,7 +15,7 @@ jobs:
              --region ${GOOGLE_COMPUTE_ZONE} \
              --username "kevin.haselhoff" \
              --disk-size "10" \
-             --cluster-version "1.10.5-gke.2" \
+             --cluster-version "1.10.5-gke.0" \
              --machine-type "f1-micro" \
              --image-type "COS" \
              --disk-type "pd-standard" \
