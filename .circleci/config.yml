@@ -72,7 +72,6 @@ jobs:
       - run:
           name: Install external-dns
           command: |
-            cd ~/cluster-tools
             helm upgrade --install --namespace kube-system ./external-dns \
             --set env.doToken="${doToken}"
 
