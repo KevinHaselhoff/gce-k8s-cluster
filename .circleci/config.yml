@@ -17,7 +17,7 @@ jobs:
             --region ${GOOGLE_COMPUTE_ZONE} \
             --username "kevin.haselhoff" \
             --disk-size "10" \
-            --cluster-version "1.10.5-gke.0" \
+            --cluster-version "1.10.4-gke.2" \
             --machine-type "f1-micro" \
             --image-type "COS" \
             --disk-type "pd-standard" \
@@ -72,6 +72,7 @@ jobs:
       - run:
           name: Install external-dns
           command: |
+            cd ~/cluster-tools
             helm upgrade --install --namespace kube-system ./external-dns \
             --set env.doToken="${doToken}"
 

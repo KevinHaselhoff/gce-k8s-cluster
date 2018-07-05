@@ -29,5 +29,5 @@ spec:
         - --provider=digitalocean
         env:
         - name: DO_TOKEN
-          value: "{{.Values.env.doToken}}"
+          value: "{{ .Values.env.doToken }}"
           
