@@ -58,7 +58,9 @@ jobs:
       - run:
           name: Install helm
           command: |
-            curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash
+            curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh
+            chmod 700 get_helm.sh
+            ./get_helm.sh
 
       - run:
           name: Init helm
