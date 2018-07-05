@@ -1,0 +1,33 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: external-dns
+  labels:
+    app: external-dns
+    chart: {{ template "external-dns.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: external-dns
+        chart: {{ template "external-dns.chart" . }}
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
+    spec:
+      replicas: {{ .Values.replicaCount }}
+      serviceAccountName: external-dns
+      containers:
+      - name: external-dns
+        image: registry.opensource.zalan.do/teapot/external-dns:latest
+        args:
+        - --source=ingress
+        - --domain-filter=khnobbi.xyz
+        - --provider=digitalocean
+        env:
+        - name: DO_TOKEN
+          value: "{{.Values.env.doToken}}"
+          

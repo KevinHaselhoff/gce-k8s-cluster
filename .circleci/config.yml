@@ -7,34 +7,83 @@ jobs:
       - run:
           name: Store Service Account
           command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
-      - run: |
-             gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
-             gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
-             gcloud --quiet config set compute/zone ${GOOGLE_COMPUTE_ZONE}
-             gcloud --quiet beta container clusters create ${GOOGLE_CLUSTER_NAME} \
-             --region ${GOOGLE_COMPUTE_ZONE} \
-             --username "kevin.haselhoff" \
-             --disk-size "10" \
-             --cluster-version "1.10.5-gke.0" \
-             --machine-type "f1-micro" \
-             --image-type "COS" \
-             --disk-type "pd-standard" \
-             --preemptible \
-             --service-account "circleci@${GOOGLE_PROJECT_ID}.iam.gserviceaccount.com" \
-             --num-nodes "3" \
-             --enable-stackdriver-kubernetes \
-             --network "default" \
-             --subnetwork "default" \
-             --enable-autoscaling \
-             --min-nodes "3" \
-             --max-nodes "5" \
-             --enable-autoupgrade --enable-autorepair \
-             --addons HorizontalPodAutoscaling,HttpLoadBalancing
-             gcloud --quiet container clusters get-credentials ${GOOGLE_CLUSTER_NAME}
+      - run:
+          name: Create cluster
+          command: |
+            gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
+            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+            gcloud --quiet config set compute/zone ${GOOGLE_COMPUTE_ZONE}
+            gcloud --quiet beta container clusters create ${GOOGLE_CLUSTER_NAME} \
+            --region ${GOOGLE_COMPUTE_ZONE} \
+            --username "kevin.haselhoff" \
+            --disk-size "10" \
+            --cluster-version "1.10.5-gke.0" \
+            --machine-type "f1-micro" \
+            --image-type "COS" \
+            --disk-type "pd-standard" \
+            --preemptible \
+            --service-account "circleci@${GOOGLE_PROJECT_ID}.iam.gserviceaccount.com" \
+            --num-nodes "3" \
+            --enable-stackdriver-kubernetes \
+            --network "default" \
+            --subnetwork "default" \
+            --enable-autoscaling \
+            --min-nodes "3" \
+            --max-nodes "5" \
+            --enable-autoupgrade --enable-autorepair \
+            --addons HorizontalPodAutoscaling
+            gcloud --quiet container clusters get-credentials ${GOOGLE_CLUSTER_NAME}
+
+
+  deploy-cluster-tools:
+
+    docker:
+      - image: google/cloud-sdk:alpine
+
+    steps:
+      - checkout:
+          path: ~/cluster-tools
+      - run:
+          name: Store Service Account
+          command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+
+      - run:
+          name: Create kubeconfig
+          command: |
+            gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
+            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+            gcloud --quiet config set compute/zone ${GOOGLE_COMPUTE_ZONE}
+            gcloud --quiet container clusters get-credentials ${GOOGLE_CLUSTER_NAME}
+      
+      - run:
+          name: Install helm
+          command: |
+            curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash
+
+      - run:
+          name: Init helm
+          command: |
+            kubectl --namespace kube-system create serviceaccount tiller
+            kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+            helm init --service-account tiller
+
+      - run:
+          name: Install external-dns
+          command: |
+            cd ~/cluster-tools
+            helm upgrade ---install ./external-dns \
+            --set env.doToken="${doToken}"
 
 workflows:
   version: 2
   create-cluster:
     jobs:
       - create-cluster:
+          context: GKE
+  
+  deploy-cluster-tools:
+    jobs:
+      - deploy-cluster-tools:
+          requires:
+            - create-cluster
           context: GKE
