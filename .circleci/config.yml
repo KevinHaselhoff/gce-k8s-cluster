@@ -38,7 +38,7 @@ jobs:
   deploy-cluster-tools:
 
     docker:
-      - image: google/cloud-sdk:alpine
+      - image: google/cloud-sdk
 
     steps:
       - checkout:
