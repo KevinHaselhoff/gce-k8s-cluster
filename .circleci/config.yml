@@ -71,18 +71,15 @@ jobs:
           name: Install external-dns
           command: |
             cd ~/cluster-tools
-            helm upgrade ---install ./external-dns \
+            helm upgrade --install --namespace kube-system ./external-dns \
             --set env.doToken="${doToken}"
 
 workflows:
   version: 2
-  create-cluster:
+  deploy-cluster:
     jobs:
       - create-cluster:
           context: GKE
-  
-  deploy-cluster-tools:
-    jobs:
       - deploy-cluster-tools:
           requires:
             - create-cluster
