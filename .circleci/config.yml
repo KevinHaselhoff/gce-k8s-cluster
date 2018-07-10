@@ -96,16 +96,32 @@ jobs:
               ./get_helm.sh
 
         - run:
+            name: Update helm repo
+            command: helm update
+
+        - run:
             name: Install nginx-ingress
             command: |
               helm upgrade --install --namespace kube-system nginx-ingress stable/nginx-ingress \
-              --set rbac.create="True"
+              --set rbac.create="true" \
+              --set controller.hostNetwork="true" \
+              --set config.ssl-redirect="false" \
+              --set config.use-proxy-protocol="false" \
+              --set publishService.enabled="true"
+
+        - run:
+            name: Install cert-manager
+            command: |
+              helm upgrade --install --namespace kube-system cert-manager stable/cert-manager \
+              --set ingressShim.defaultIssuerName=letsencrypt-prod \
+              --set ingressShim.defaultIssuerKind=ClusterIssuer
+              k apply -f ~/cluster-tools/cert-manager/cluster-production-issuer.yaml
 
         - run:
             name: Install external-dns
             command: |
               cd ~/cluster-tools
-              helm upgrade --install --namespace kube-system ./external-dns \
+              helm upgrade --install --namespace kube-system external-dns ./external-dns \
               --set env.doToken="${doToken}"
 
 
